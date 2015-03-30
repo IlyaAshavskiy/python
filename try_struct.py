@@ -57,9 +57,9 @@ def walk(dir):
             except struct.error:
                 pass
             if about == ('QFI\xfb',):
-                information = {"filename":path,"virtual_size":virtual_size}
-                if backing_file_offset != null:
-                    information.setdefault("backing_file",backing_file_offset)
+                information = {"filename": path, "virtual_size": virtual_size}
+                if backing_file_offset != 0:
+                    information.setdefault ("backing_file", backing_file_offset)
                 with open('info.json', 'w') as outfile: json.dump(information, outfile)
                 print (path)
                 print (virtual_size)
