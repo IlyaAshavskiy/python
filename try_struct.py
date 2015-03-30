@@ -53,16 +53,25 @@ def walk(dir):
                 filename.seek(24)
                 virtual_size = filename.read(8)
                 virtual_size = struct.unpack('>Q', virtual_size)
+                filename.seek(60)
+                nb_snapshots = filename.read(4)
+                nb_snapshots = struct.unpack('>I', nb_snapshots)
+                #filename.seek(64)
+                #snapshots_offset = filename.read(8)
+                #snapshots_offset = struct.unpack('Q',snapshots_offset)
                 filename.close
             except struct.error:
                 pass
             if about == ('QFI\xfb',):
                 information = {"filename": path, "virtual_size": virtual_size}
-                if backing_file_offset != 0:
-                    information.setdefault ("backing_file", backing_file_offset)
+                #if backing_file_offset != (0,):
+                 #   information.setdefault("backing_file", backing_file_offset)
                 with open('info.json', 'w') as outfile: json.dump(information, outfile)
                 print (path)
                 print (virtual_size)
+                if nb_snapshots != (0,):
+                    print (nb_snapshots)
+                    #print (snapshots_offset)
                 if backing_file_offset != (0,):
                     print (backing_file_offset)
         else:
