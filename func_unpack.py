@@ -55,28 +55,21 @@ def walk(dir):
             about = unpacker(0, 4, '4s')
             if about == ('QFI\xfb',):
                 backing_file_offset = unpacker(8, 8, '>Q')
-                backing_file_size = unpacker(16, 4, '>I')
                 virtual_size = unpacker(24, 8, '>Q')
                 nb_snapshots = unpacker(60, 4, '>I')
-                snapshots_offset = unpacker(64,8,'>Q')
-                information = {"filename": path, "virtual_size": virtual_size}
+                information = {"filename": path,"size": None, "virtual_size": virtual_size}
                 with open('info.json', 'w') as outfile:
                     json.dump(information, outfile)
-                print (path)
-                print (virtual_size)
-                #if nb_snapshots != (0,):
-
-                # print (snapshots_offset)
+                # test if we have backing file then add name of it to our json
                 if backing_file_offset != (0,):
-                    backing_file_info=unpacker(backing_file_offset[0],backing_file_size[0],str(backing_file_size[0])+'s')
-                    print (backing_file_info)
+                    backing_file_size = unpacker(16, 4, '>I')
+                    backing_file_info = unpacker(
+                        backing_file_offset[0], backing_file_size[0], str(backing_file_size[0]) + 's')
+                    information.setdefault("backing_file", backing_file_info)
+                if nb_snapshots != (0,):
+                    snapshots_offset = unpacker(64, 8, '>Q')
 
-                # if backing_file_offset != (0,):
-                # information.setdefault("backing_file", backing_file_offset)
 
-            else:
-                filename.close()
-                pass
 
             filename.close()
         else:
