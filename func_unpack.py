@@ -1,8 +1,8 @@
 import os
 import struct
 import json
-# -*- coding: utf-8 -*-
-# !/usr/bin/python
+#-*- coding: utf-8 -*-
+#!/usr/bin/python
 
 
 """
@@ -46,42 +46,40 @@ def walk(dir):
         path = os.path.join(dir, name)
         if os.path.isfile(path):
             filename = open(path, 'rb')
-            filename.seek(0)
-            about = filename.read(4)
-            about = struct.unpack('4s', about)
+
+            def unpacker(karetka, howmany, form):
+                filename.seek(int(karetka))
+                output = filename.read(int(howmany))
+                output = struct.unpack(str(form), output)
+                return output
+            about = unpacker(0, 4, '4s')
             if about == ('QFI\xfb',):
-                '''def unpacker(karetka,howmany,form,output):
-                    filename.seek(int(karetka))
-                    output=filename.read(int(howmany))
-                    output=struct.unpack(str(form),output)
-                    return output
-                unpacker(0,4,'4s','about')'''
-                backing_file_offset = filename.read(8)
-                backing_file_offset = struct.unpack('>Q', backing_file_offset)
-                filename.seek(24)
-                virtual_size = filename.read(8)
-                virtual_size = struct.unpack('>Q', virtual_size)
-                filename.seek(60)
-                nb_snapshots = filename.read(4)
-                nb_snapshots = struct.unpack('>I', nb_snapshots)
-                filename.seek(64)
-                snapshots_offset = filename.read(8)
-                snapshots_offset = struct.unpack('Q', snapshots_offset)
-                filename.close()
+                backing_file_offset = unpacker(8, 8, '>Q')
+                backing_file_size = unpacker(16, 4, '>I')
+                virtual_size = unpacker(24, 8, '>Q')
+                nb_snapshots = unpacker(60, 4, '>I')
+                snapshots_offset = unpacker(64,8,'>Q')
                 information = {"filename": path, "virtual_size": virtual_size}
-                # if backing_file_offset != (0,):
-                # information.setdefault("backing_file", backing_file_offset)
                 with open('info.json', 'w') as outfile:
                     json.dump(information, outfile)
                 print (path)
                 print (virtual_size)
-                if nb_snapshots != (0,):
-                    print (nb_snapshots)
+                #if nb_snapshots != (0,):
+
                 # print (snapshots_offset)
                 if backing_file_offset != (0,):
-                    print (backing_file_offset)
+                    backing_file_info=unpacker(backing_file_offset[0],backing_file_size[0],str(backing_file_size[0])+'s')
+                    print (backing_file_info)
+
+                # if backing_file_offset != (0,):
+                # information.setdefault("backing_file", backing_file_offset)
+
             else:
-                print('not a qcow2')
+                filename.close()
+                pass
+
+            filename.close()
         else:
             walk(path)
-walk('/home/ilya/TESTQCOW/QCOW/')
+
+walk('/home/ilya/TESTQCOW/')
